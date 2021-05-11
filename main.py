@@ -6,7 +6,7 @@ import json
 import os
 
 ps = PorterStemmer()
-path = 'source/'
+path = 'TestFiles/'
 index = {}
 index['the'] = 0
 total_doc = 0
@@ -20,14 +20,14 @@ for filename in os.listdir(path):
         raw_data = soup.get_text()
         tokenizer = nltk.RegexpTokenizer(r'\w{2,}')
         tokens = tokenizer.tokenize(raw_data)
+        print(f)
         for x in tokens:
             x = x.lower()
-            x = ps.stem(x)
             flag=0
-            if x in index.items():
+            if x in index.keys():
                     index[x] +=1
                     flag=1
-                    break
+                    continue
             if flag == 0:
                 index[x] = 1
             else: 
