@@ -20,9 +20,12 @@ import os
 
 
 count = {}
+query_index = {}
+
 ps = SnowballStemmer("english")
 def text_processing():
     path = 'testingfiles/'
+    query_counter = 0
     total_doc = 0
     for filename in os.listdir(path):
         with open(os.path.join(path,filename),'r') as f:
@@ -34,11 +37,11 @@ def text_processing():
             raw_data = soup.get_text()
             tokenizer = nltk.RegexpTokenizer(r'\w{2,}')
             tokens = tokenizer.tokenize(raw_data)
-            word_count(tokens,total_doc,count)
+            word_count(tokens,total_doc,count, query_counter)
             print(total_doc)
     return count, total_doc
 
-def word_count(tokens,total_doc,count):
+def word_count(tokens,total_doc,count, query_counter):
     for x in tokens:
         x = x.lower()
         x = ps.stem(x)
@@ -46,11 +49,16 @@ def word_count(tokens,total_doc,count):
             count[x].add(total_doc)
         except: 
             count[x] = {total_doc}
-
+        if x in query_index:
+            continue
+        else:
+            query_index[x] = query_counter
+            query_counter += 1
+        
 def doc_freq(word):
     c = 0
     try:
-        c = DF[word]
+        c = DFcount[word]
     except:
         pass
     return c
@@ -128,3 +136,31 @@ index = final_adding()
 f = open("indexer.txt","w", encoding="utf8")
 f.write(str(index))
 f.close()
+f = open("stats.txt", "w", encoding="utf8" )
+f.write(str(N))
+f.write("\n")
+f.write(str(total_vocab_size))
+f.close()
+f = open("df.txt", "w", encoding="utf8")
+f.write(str(DFcount))
+f.close()
+f = open("vocab.txt", "w", encoding="utf8")
+f.write(str(total_vocab))
+f.close()
+f = open("query_index.txt", 'w', encoding ="utf8")
+f.write(str(query_index))
+f.close()
+
+def vectorize():
+    # f = open("vocab.txt", "r", encoding = "utf8")
+    # total_vocab = f.read()
+    # with open("index.txt", "r", encoding="utf8") as y:
+    #     index = y.read()    
+    D = np.zeros((N, total_vocab_size))
+    for i in index:
+        try:
+            ind = total_vocab.index(i[1])
+            D[i[0]][ind] = index[i]
+        except:
+            pass
+    return D
